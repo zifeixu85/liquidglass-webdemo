@@ -31,15 +31,38 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <>
       <div className="glass-card overflow-hidden group cursor-pointer" onClick={handlePlay}>
-        <div className={`h-40 ${thumbnail} relative flex items-center justify-center`}>
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform">
+        <div className="h-40 relative flex items-center justify-center">
+          {/* YouTube Thumbnail */}
+          {youtubeId ? (
+            <img 
+              src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`}
+              alt={title}
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => {
+                // Fallback to lower quality if maxresdefault doesn't exist
+                e.currentTarget.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+              }}
+            />
+          ) : (
+            <div className={`absolute inset-0 ${thumbnail}`} />
+          )}
+          
+          {/* Dark overlay for better visibility */}
+          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+          
+          {/* Play button */}
+          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform relative z-10">
             <Play className="w-8 h-8 text-white ml-1" />
           </div>
-          <div className="absolute top-4 right-4 bg-black/30 px-2 py-1 rounded text-white text-sm">
+          
+          {/* Duration badge */}
+          <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-white text-sm z-10">
             {duration}
           </div>
+          
+          {/* YouTube badge */}
           {youtubeId && (
-            <div className="absolute top-4 left-4 bg-red-600/80 px-2 py-1 rounded text-white text-xs font-medium">
+            <div className="absolute top-4 left-4 bg-red-600/90 backdrop-blur-sm px-2 py-1 rounded text-white text-xs font-medium z-10">
               YouTube
             </div>
           )}
@@ -69,7 +92,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             <div className="glass-card overflow-hidden">
               <div className="aspect-video">
                 <iframe
-                  src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&fs=0&iv_load_policy=3&cc_load_policy=0&playsinline=1&color=white&autohide=1&loop=1&playlist=${youtubeId}`}
+                  src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&fs=1&iv_load_policy=3&cc_load_policy=0&playsinline=1&color=white&autohide=1&loop=1&playlist=${youtubeId}`}
                   title={title}
                   className="w-full h-full border-0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

@@ -1,7 +1,3 @@
-interface EmailSubscription {
-  email: string;
-}
-
 interface EmailResponse {
   success: boolean;
   message: string;
@@ -12,10 +8,13 @@ export const subscribeToNewsletter = async (email: string): Promise<EmailRespons
   const apiKey = import.meta.env.VITE_RESEND_API_KEY;
   const fromEmail = import.meta.env.VITE_FROM_EMAIL || 'noreply@liquidglass-kit.dev';
   
-  if (!apiKey || apiKey === 'your_resend_api_key_here') {
+  console.log('Checking API key:', apiKey ? 'Found' : 'Not found');
+  
+  if (!apiKey) {
+    console.error('Resend API key not found in environment variables');
     return {
       success: false,
-      message: 'Email service not configured'
+      message: 'Email service not configured. Please try again later.'
     };
   }
 
@@ -56,7 +55,7 @@ export const subscribeToNewsletter = async (email: string): Promise<EmailRespons
   }
 };
 
-const generateWelcomeEmail = (email: string): string => {
+const generateWelcomeEmail = (_email: string): string => {
   return `
 <!DOCTYPE html>
 <html>
