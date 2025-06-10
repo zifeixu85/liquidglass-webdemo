@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/subscribe.ts": {
-      "runtime": "@vercel/node"
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
