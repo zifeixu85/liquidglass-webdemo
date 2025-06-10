@@ -381,20 +381,20 @@ function App() {
                       <span>iOS 26</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                      <span>macOS 26</span>
-                    </div>
-                    <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                       <span>iPadOS 26</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
-                      <span>visionOS 26</span>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span>macOS 26</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
                       <span>watchOS 26</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
+                      <span>visionOS 26</span>
                     </div>
                   </div>
                 </div>
