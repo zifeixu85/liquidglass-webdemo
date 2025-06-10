@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { ExternalLink, Mail, Download, Code2, Palette, Layers, Sparkles, ChevronDown, Check, Share2, Link, Star } from 'lucide-react';
 import { VideoPlayer } from './components/VideoPlayer';
 import Analytics from './components/Analytics';
+import { subscribeToNewsletter } from './utils/emailService';
 
 function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscriptionMessage, setSubscriptionMessage] = useState('');
   const [copyStatus, setCopyStatus] = useState('');
 
   useEffect(() => {
@@ -17,14 +20,39 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      setIsSubscribed(true);
-      setTimeout(() => {
-        setIsSubscribed(false);
+    if (!email) return;
+
+    setIsSubscribing(true);
+    setSubscriptionMessage('');
+
+    try {
+      const result = await subscribeToNewsletter(email);
+      
+      if (result.success) {
+        setIsSubscribed(true);
+        setSubscriptionMessage(result.message);
         setEmail('');
-      }, 3000);
+        
+        // Reset after 5 seconds
+        setTimeout(() => {
+          setIsSubscribed(false);
+          setSubscriptionMessage('');
+        }, 5000);
+      } else {
+        setSubscriptionMessage(result.message);
+        setTimeout(() => {
+          setSubscriptionMessage('');
+        }, 4000);
+      }
+    } catch (error) {
+      setSubscriptionMessage('Network error. Please try again.');
+      setTimeout(() => {
+        setSubscriptionMessage('');
+      }, 4000);
+    } finally {
+      setIsSubscribing(false);
     }
   };
 
@@ -217,8 +245,8 @@ function App() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Layers className="w-6 h-6 text-white" />
+              <div className="w-10 h-10">
+                <img src="/logo.svg" alt="Liquid Glass Logo" className="w-full h-full" />
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold text-white tracking-tight">Liquid Glass</span>
@@ -417,10 +445,12 @@ function App() {
                     />
                     <button
                       type="submit"
-                      disabled={isSubscribed}
+                      disabled={isSubscribed || isSubscribing}
                       className={`px-8 py-4 rounded-xl font-bold text-lg transition-all whitespace-nowrap ${
                         isSubscribed
                           ? 'bg-green-500 text-white'
+                          : isSubscribing
+                          ? 'bg-gray-500 text-white cursor-not-allowed'
                           : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105'
                       }`}
                     >
@@ -429,11 +459,27 @@ function App() {
                           <Check className="w-5 h-5 mr-2" />
                           Subscribed!
                         </div>
+                      ) : isSubscribing ? (
+                        <div className="flex items-center">
+                          <div className="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Subscribing...
+                        </div>
                       ) : (
                         'Subscribe Now'
                       )}
                     </button>
                   </div>
+                  
+                  {/* Subscription Message */}
+                  {subscriptionMessage && (
+                    <div className={`mt-4 p-3 rounded-lg text-center text-sm ${
+                      isSubscribed 
+                        ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                        : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                    }`}>
+                      {subscriptionMessage}
+                    </div>
+                  )}
                   
                   <div className="flex flex-wrap items-center justify-center gap-6 mt-4 text-white/60 text-sm">
                     <span className="flex items-center">
@@ -788,10 +834,12 @@ function App() {
                 />
                 <button
                   type="submit"
-                  disabled={isSubscribed}
+                  disabled={isSubscribed || isSubscribing}
                   className={`px-8 py-4 rounded-xl font-semibold transition-all whitespace-nowrap ${
                     isSubscribed
                       ? 'bg-green-500 text-white'
+                      : isSubscribing
+                      ? 'bg-gray-500 text-white cursor-not-allowed'
                       : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/25 hover:scale-105'
                   }`}
                 >
@@ -799,6 +847,11 @@ function App() {
                     <div className="flex items-center">
                       <Check className="w-5 h-5 mr-2" />
                       Subscribed!
+                    </div>
+                  ) : isSubscribing ? (
+                    <div className="flex items-center">
+                      <div className="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Subscribing...
                     </div>
                   ) : (
                     'Subscribe Now'
@@ -838,8 +891,8 @@ function App() {
             {/* Brand Section */}
             <div className="md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Layers className="w-6 h-6 text-white" />
+                <div className="w-10 h-10">
+                  <img src="/logo.svg" alt="Liquid Glass Logo" className="w-full h-full" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-2xl font-bold text-white tracking-tight">Liquid Glass</span>
