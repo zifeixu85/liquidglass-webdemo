@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://liquidglass-kit.dev/sitemap.xml
+
+# Block common non-content paths
+Disallow: /api/
+Disallow: /_next/
+Disallow: /assets/
+Disallow: /.env*
+
+# Allow specific assets that might be indexed
+Allow: /assets/*.css
+Allow: /assets/*.js
+
+# Crawl delay for all bots (optional - helps with server load)
+Crawl-delay: 1
