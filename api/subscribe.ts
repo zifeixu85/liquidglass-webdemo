@@ -1,41 +1,55 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const RESEND_API_KEY = process.env.VITE_RESEND_API_KEY || process.env.RESEND_API_KEY;
+const RESEND_API_KEY = process.env.RESEND_API_KEY || process.env.VITE_RESEND_API_KEY;
 const FROM_EMAIL = process.env.VITE_FROM_EMAIL || 'noreply@liquidglass-kit.dev';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
-
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  // Only allow POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { email } = req.body;
-
-  if (!email || !email.includes('@')) {
-    return res.status(400).json({ error: 'Valid email is required' });
-  }
-
-  if (!RESEND_API_KEY) {
-    console.error('Resend API key not found');
-    return res.status(500).json({ error: 'Email service not configured' });
-  }
-
   try {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+
+    // Handle preflight request
+    if (req.method === 'OPTIONS') {
+      res.status(200).end();
+      return;
+    }
+
+    // Only allow POST
+    if (req.method !== 'POST') {
+      return res.status(405).json({ 
+        success: false,
+        error: 'Method not allowed' 
+      });
+    }
+
+    // Debug logging
+    console.log('Request body:', req.body);
+    console.log('API Key available:', !!RESEND_API_KEY);
+    console.log('From email:', FROM_EMAIL);
+
+    const { email } = req.body || {};
+
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Valid email is required' 
+      });
+    }
+
+    if (!RESEND_API_KEY) {
+      console.error('Resend API key not found in environment variables');
+      return res.status(500).json({ 
+        success: false,
+        error: 'Email service not configured' 
+      });
+    }
+
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -51,9 +65,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Resend API error:', errorData);
-      throw new Error(errorData.message || `HTTP ${response.status}`);
+      const errorText = await response.text();
+      console.error('Resend API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { message: errorText };
+      }
+      
+      return res.status(500).json({
+        success: false,
+        error: errorData.message || `Resend API error: ${response.status}`
+      });
     }
 
     const data = await response.json();
@@ -63,11 +92,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       message: 'Successfully subscribed! Check your email for confirmation.',
       id: data.id
     });
+
   } catch (error) {
     console.error('Email subscription error:', error);
     return res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : 'Failed to subscribe. Please try again.'
+      error: error instanceof Error ? error.message : 'Failed to subscribe. Please try again.'
     });
   }
 }

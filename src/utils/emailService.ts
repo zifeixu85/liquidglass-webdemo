@@ -15,10 +15,20 @@ export const subscribeToNewsletter = async (email: string): Promise<EmailRespons
       body: JSON.stringify({ email }),
     });
 
-    const data = await response.json();
+    // Try to parse as JSON, fallback to text if it fails
+    let data;
+    const contentType = response.headers.get('content-type');
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      console.error('Non-JSON response:', text);
+      throw new Error('Server returned an invalid response. Please try again.');
+    }
     
     if (!response.ok) {
-      throw new Error(data.message || data.error || `HTTP ${response.status}`);
+      throw new Error(data.message || data.error || `Server error: ${response.status}`);
     }
 
     return {
@@ -28,6 +38,14 @@ export const subscribeToNewsletter = async (email: string): Promise<EmailRespons
     };
   } catch (error) {
     console.error('Email subscription error:', error);
+    
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return {
+        success: false,
+        message: 'Network error. Please check your connection and try again.'
+      };
+    }
+    
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to subscribe. Please try again.'
