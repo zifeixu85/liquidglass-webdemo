@@ -69,7 +69,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             <div className="glass-card overflow-hidden">
               <div className="aspect-video">
                 <iframe
-                  src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+                  src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&fs=0&iv_load_policy=3&cc_load_policy=0&playsinline=1&color=white&autohide=1&loop=1&playlist=${youtubeId}`}
                   title={title}
                   className="w-full h-full border-0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

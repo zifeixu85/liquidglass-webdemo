@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, Mail, Download, Code2, Palette, Layers, Sparkles, ChevronDown, Check, Share2, Link, Star } from 'lucide-react';
 import { VideoPlayer } from './components/VideoPlayer';
+import Analytics from './components/Analytics';
 
 function App() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -205,6 +206,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Analytics />
 
       {/* Navigation */}
       <nav className={`fixed w-full z-40 transition-all duration-500 top-0 ${
@@ -374,7 +376,7 @@ function App() {
               <div className="relative">
                 <div className="aspect-video bg-black/20 rounded-2xl overflow-hidden ring-1 ring-white/20">
                   <iframe
-                    src={`https://www.youtube.com/embed/${heroVideo.youtubeId}?rel=0&modestbranding=1&showinfo=0`}
+                    src={`https://www.youtube.com/embed/${heroVideo.youtubeId}?rel=0&modestbranding=1&showinfo=0&controls=1&fs=0&iv_load_policy=3&cc_load_policy=0&playsinline=1&color=white&autohide=1&loop=1&playlist=${heroVideo.youtubeId}`}
                     title={heroVideo.title}
                     className="w-full h-full border-0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
