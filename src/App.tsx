@@ -426,7 +426,7 @@ function App() {
                 <div className="text-center mb-6">
                   <div className="flex items-center justify-center gap-3 mb-3">
                     <Mail className="w-6 h-6 text-blue-400" />
-                    <h3 className="text-xl font-bold text-white">Get Developer Updates</h3>
+                    <h3 className="text-xl font-bold text-white">Get Liquid Glass Updates</h3>
                   </div>
                   <p className="text-white/70">
                     Join thousands of developers • Weekly code snippets • New libraries & frameworks • Zero spam
@@ -439,7 +439,7 @@ function App() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your-email@company.com"
+                      placeholder="name@example.com"
                       className="flex-1 px-6 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 backdrop-blur-sm focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all"
                       required
                     />
@@ -465,7 +465,7 @@ function App() {
                           Subscribing...
                         </div>
                       ) : (
-                        'Subscribe Now'
+                        'Notify Me'
                       )}
                     </button>
                   </div>
@@ -775,8 +775,8 @@ function App() {
                 {[
                   "SF Symbols 5",
                   "Apple Design Resources",
-                  "iOS 18 UI Kit",
-                  "macOS Sequoia Kit"
+                  "iOS 26 UI Kit",
+                  "macOS Tahoe Kit"
                 ].map((tool, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                     <div className="flex items-center">
@@ -817,7 +817,7 @@ function App() {
               </p>
               <p className="text-white/70 leading-relaxed max-w-2xl mx-auto">
                 Get exclusive access to new design resources, SwiftUI code snippets, WWDC 2025 insights, 
-                glassmorphism tutorials, and early previews of upcoming iOS 18 and macOS Sequoia design patterns. 
+                glassmorphism tutorials, and early previews of upcoming iOS 26 and macOS Tahoe design patterns. 
                 Delivered weekly to your inbox.
               </p>
             </div>
@@ -854,7 +854,7 @@ function App() {
                       Subscribing...
                     </div>
                   ) : (
-                    'Subscribe Now'
+                    'Notify Me'
                   )}
                 </button>
               </div>
@@ -901,7 +901,7 @@ function App() {
               </div>
               <p className="text-white/70 leading-relaxed max-w-md">
                 Your ultimate resource hub for Apple's Liquid Glass design system from WWDC 2025. 
-                Comprehensive tutorials, design kits, and SwiftUI examples for iOS 18, macOS Sequoia, and visionOS.
+                Comprehensive tutorials, design kits, and SwiftUI examples for iOS 26, macOS Tahoe, and visionOS.
               </p>
               <div className="flex items-center space-x-4 mt-4">
                 <button 
