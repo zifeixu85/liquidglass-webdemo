@@ -1,40 +1,31 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY || process.env.VITE_RESEND_API_KEY;
-const FROM_EMAIL = process.env.VITE_FROM_EMAIL || 'noreply@liquidglass-kit.dev';
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // Only allow POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ 
+      success: false,
+      error: 'Method not allowed' 
+    });
+  }
+
   try {
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
-
-    // Handle preflight request
-    if (req.method === 'OPTIONS') {
-      res.status(200).end();
-      return;
-    }
-
-    // Only allow POST
-    if (req.method !== 'POST') {
-      return res.status(405).json({ 
-        success: false,
-        error: 'Method not allowed' 
-      });
-    }
-
-    // Debug logging
-    console.log('Request body:', req.body);
-    console.log('API Key available:', !!RESEND_API_KEY);
-    console.log('From email:', FROM_EMAIL);
-
     const { email } = req.body || {};
+    const apiKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.VITE_FROM_EMAIL || 'Liquid Glass Kit <noreply@liquidglass-kit.dev>';
 
+    // Validate email
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return res.status(400).json({ 
         success: false,
@@ -42,46 +33,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    if (!RESEND_API_KEY) {
-      console.error('Resend API key not found in environment variables');
+    // Check API key
+    if (!apiKey) {
+      console.error('Resend API key not found');
       return res.status(500).json({ 
         success: false,
         error: 'Email service not configured' 
       });
     }
 
+    // Send email via Resend API
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: email,
+        from: fromEmail,
+        to: [email],
         subject: '🎉 Welcome to Liquid Glass Kit!',
-        html: generateWelcomeEmail(email),
+        html: getWelcomeEmailHTML(),
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Resend API error:', {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText
-      });
-      
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch {
-        errorData = { message: errorText };
-      }
-      
+      console.error('Resend API error:', response.status, errorText);
       return res.status(500).json({
         success: false,
-        error: errorData.message || `Resend API error: ${response.status}`
+        error: `Email service error: ${response.status}`
       });
     }
 
@@ -94,15 +75,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
   } catch (error) {
-    console.error('Email subscription error:', error);
+    console.error('API error:', error);
     return res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to subscribe. Please try again.'
+      error: 'Internal server error'
     });
   }
 }
 
-function generateWelcomeEmail(_email: string): string {
+function getWelcomeEmailHTML(): string {
   return `
 <!DOCTYPE html>
 <html>
@@ -189,10 +170,6 @@ function generateWelcomeEmail(_email: string): string {
       border-radius: 12px;
       font-weight: 600;
       box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
-      transition: transform 0.2s;
-    }
-    .cta a:hover {
-      transform: translateY(-2px);
     }
     .footer {
       text-align: center;
@@ -238,6 +215,5 @@ function generateWelcomeEmail(_email: string): string {
     </div>
   </div>
 </body>
-</html>
-  `.trim();
+</html>`;
 }
