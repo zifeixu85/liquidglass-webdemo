@@ -4,93 +4,46 @@ interface EmailResponse {
   id?: string;
 }
 
+// 使用 Formspree (最简单，无需后端，无需 Resend)
 export const subscribeToNewsletter = async (email: string): Promise<EmailResponse> => {
-  console.log('[Email Service] Starting subscription for:', email);
-  console.log('[Email Service] Current URL:', window.location.href);
-  console.log('[Email Service] Environment:', window.location.hostname);
-  
   try {
-    // 根据环境使用不同的 API 地址
-    const apiUrl = window.location.hostname === 'localhost' 
-      ? 'https://liquidglass-kit.dev/api/subscribe'  // 本地开发时使用生产 API
-      : '/api/subscribe';  // 生产环境使用相对路径
-    
-    console.log('[Email Service] API URL:', apiUrl);
-    console.log('[Email Service] Sending request to:', apiUrl);
-    
-    const response = await fetch(apiUrl, {
+    const response = await fetch('https://formspree.io/f/mzzgrbvl', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ 
+        email,
+        _subject: '🎉 New Liquid Glass Kit Subscription',
+        message: `${email} subscribed to Liquid Glass Kit updates`,
+        _replyto: email,
+        // Formspree 会自动发送确认邮件给订阅者
+      }),
     });
 
-    console.log('[Email Service] Response status:', response.status);
-    console.log('[Email Service] Response headers:', response.headers);
+    const data = await response.json();
     
-    // 检查 Content-Type 来决定如何解析响应
-    const contentType = response.headers.get('content-type');
-    console.log('[Email Service] Content-Type:', contentType);
-    
-    let data;
-    
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-      console.log('[Email Service] JSON response:', data);
-    } else {
-      // 如果不是 JSON，读取文本内容
-      const text = await response.text();
-      console.error('[Email Service] Non-JSON response:', text);
-      
-      // 创建一个错误对象
-      data = {
-        success: false,
-        error: text || 'Server error',
-        details: `Response was not JSON. Status: ${response.status}, Text: ${text}`
+    if (response.ok) {
+      return {
+        success: true,
+        message: 'Successfully subscribed! Check your email for confirmation.',
+        id: data.submission_id
       };
     }
     
-    if (!response.ok) {
-      console.error('[Email Service] Response not OK. Status:', response.status);
-      console.error('[Email Service] Error data:', data);
-      throw new Error(data.error || data.details || `Server error: ${response.status}`);
+    // Formspree 错误处理
+    if (data.errors) {
+      const errorMessage = data.errors.map((e: any) => e.message).join(', ');
+      throw new Error(errorMessage);
     }
-
-    console.log('[Email Service] Subscription successful:', data);
     
-    return {
-      success: true,
-      message: data.message || 'Successfully subscribed! Check your email for confirmation.',
-      id: data.id
-    };
+    throw new Error('Subscription failed');
   } catch (error) {
-    console.error('[Email Service] Subscription error:', error);
-    console.error('[Email Service] Error type:', typeof error);
-    console.error('[Email Service] Error details:', error);
-    
-    // 检查是否是网络错误
-    if (error instanceof TypeError && error.message === 'Failed to fetch') {
-      console.error('[Email Service] Network error - API endpoint might not be accessible');
-      console.error('[Email Service] This could mean:');
-      console.error('- Vercel Function is not deployed');
-      console.error('- API route is returning an error before sending headers');
-      console.error('- Network/CORS issue');
-      
-      // 尝试直接检查 API 端点
-      try {
-        const checkResponse = await fetch('/api/subscribe', { method: 'OPTIONS' });
-        console.log('[Email Service] OPTIONS check response:', checkResponse.status);
-      } catch (optionsError) {
-        console.error('[Email Service] OPTIONS check failed:', optionsError);
-      }
-    }
-    
+    console.error('Subscription error:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to subscribe. Please try again.'
     };
   }
 };
-
 
