@@ -3,6 +3,9 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY || 're_7jKXiqkN_F4zVG1W4zGzw2EJkg9p9wiWJ');
 
 export default async function handler(req: any, res: any) {
+  console.log('[Subscribe API] Request method:', req.method);
+  console.log('[Subscribe API] Request headers:', req.headers);
+  
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,11 +14,13 @@ export default async function handler(req: any, res: any) {
 
   // Handle preflight request
   if (req.method === 'OPTIONS') {
+    console.log('[Subscribe API] Handling OPTIONS preflight request');
     return res.status(200).end();
   }
 
   // Only allow POST
   if (req.method !== 'POST') {
+    console.log('[Subscribe API] Method not allowed:', req.method);
     return res.status(405).json({ 
       success: false,
       error: 'Method not allowed' 
@@ -23,16 +28,21 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    console.log('[Subscribe API] Request body:', req.body);
     const { email } = req.body || {};
 
     // Validate email
     if (!email || typeof email !== 'string' || !email.includes('@')) {
+      console.log('[Subscribe API] Invalid email:', email);
       return res.status(400).json({ 
         success: false,
         error: 'Valid email is required' 
       });
     }
 
+    console.log('[Subscribe API] Processing subscription for:', email);
+    console.log('[Subscribe API] API Key present:', !!process.env.RESEND_API_KEY);
+    
     // Send welcome email using Resend SDK
     const { data, error } = await resend.emails.send({
       from: 'Liquid Glass Kit <noreply@liquidglass-kit.dev>',
@@ -74,12 +84,16 @@ export default async function handler(req: any, res: any) {
     });
 
     if (error) {
-      console.error('Resend error:', error);
+      console.error('[Subscribe API] Resend SDK error:', error);
+      console.error('[Subscribe API] Error details:', JSON.stringify(error, null, 2));
       return res.status(500).json({
         success: false,
-        error: 'Failed to send welcome email'
+        error: 'Failed to send welcome email',
+        details: error.message || error
       });
     }
+    
+    console.log('[Subscribe API] Email sent successfully:', data);
     
     return res.status(200).json({
       success: true,
@@ -88,10 +102,14 @@ export default async function handler(req: any, res: any) {
     });
 
   } catch (error) {
-    console.error('API error:', error);
+    console.error('[Subscribe API] Unexpected error:', error);
+    console.error('[Subscribe API] Error type:', typeof error);
+    console.error('[Subscribe API] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    
     return res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 }
