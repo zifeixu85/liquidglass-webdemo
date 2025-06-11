@@ -48,6 +48,11 @@
 .liquidGlass-text {
   z-index: 3;
   color: white;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
 }
 
 /* Drag-related styles */
@@ -67,6 +72,11 @@
 .draggable.dragging {
   z-index: 999;
   /* Maintain identical visual effects to default state when dragging */
+}
+
+.draggable.resizing {
+  z-index: 999;
+  /* Maintain identical visual effects to default state when resizing */
 }
 
 /* Responsive adjustments */

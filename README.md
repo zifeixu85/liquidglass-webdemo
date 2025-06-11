@@ -13,7 +13,7 @@ An interactive preview tool showcasing the Liquid Glass effect with CSS glassmor
 
 ## Live Demo
 
-🌐 **[View Live Demo on Vercel](https://liquidglass-web.vercel.app)**
+🌐 **[View Live Demo on Vercel](https://liquidglass-webdemo.vercel.app/)**
 
 ## Features
 

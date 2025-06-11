@@ -43,7 +43,7 @@ export function GlassControls({ params, onParamsChange, mousePosition, autoOffse
         <div className="mb-4 space-y-1 border-b border-white/20 pb-3">
           <div>Mouse: ({Math.round(mousePosition.x * 100)}, {Math.round(mousePosition.y * 100)})</div>
           <div>Flow: ({Math.round(autoOffset.x)}, {Math.round(autoOffset.y)})</div>
-          <div className="text-white/60">💡 Drag cards to move them around</div>
+<div className="text-white/60">💡 Drag cards to move • Bottom-right to resize</div>
         </div>
 
         {/* Glass Parameters */}

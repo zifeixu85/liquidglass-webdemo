@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { ExternalLink, Image, Github } from 'lucide-react';
+import { ExternalLink, Image, GitBranch } from 'lucide-react';
 import { LiquidGlass } from './components/LiquidGlass';
 import { DraggableCard } from './components/DraggableCard';
 import { GlassControls } from './components/GlassControls';
 
 const backgrounds = [
   // Nature/Landscape first
+  'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&q=80&w=2940',
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80&w=2940',
   'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&q=80&w=2940',
   'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2940',
@@ -14,14 +15,14 @@ const backgrounds = [
   'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?auto=format&fit=crop&q=80&w=2940',
   // Abstract/Gradient styles
   'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=2940',
-  'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&q=80&w=2940',
-  'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&q=80&w=2940'
+  'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&q=80&w=2940'
 ];
 
 function App() {
   const [currentBg, setCurrentBg] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [autoOffset, setAutoOffset] = useState({ x: 0, y: 0 });
+  const [activeCardId, setActiveCardId] = useState<string>('main-card');
   
   // Liquid Glass adjustable parameters
   const [glassParams, setGlassParams] = useState({
@@ -75,6 +76,14 @@ function App() {
 
   const nextBackground = () => {
     setCurrentBg((prev) => (prev + 1) % backgrounds.length);
+  };
+
+  const handleCardInteraction = (cardId: string) => {
+    setActiveCardId(cardId);
+  };
+
+  const getCardZIndex = (cardId: string) => {
+    return cardId === activeCardId ? 10 : 1;
   };
 
   // Calculate background transform combining auto-flow and mouse position
@@ -158,13 +167,20 @@ function App() {
       {/* Main Content */}
       <div className="relative min-h-screen flex flex-col items-center justify-center p-4 gap-6">
         {/* Main Card - Draggable */}
-        <DraggableCard className="max-w-2xl w-full" initialPosition={{ x: 0, y: 0 }}>
+        <DraggableCard 
+          className="" 
+          id="main-card"
+          initialPosition={{ x: 0, y: 0 }} 
+          initialSize={{ width: 600, height: 'auto' }}
+          onInteraction={handleCardInteraction}
+          zIndex={getCardZIndex('main-card')}
+        >
           <LiquidGlass params={glassParams}>
             <div className="p-8 md:p-12">
               {/* Header with background switch */}
               <div className="flex items-center justify-between mb-8">
                 <div className="text-white/60 text-sm flex items-center gap-2">
-                  <span>🖱️ Drag to move</span>
+<span>🖱️ Drag to move • ↘️ Resize</span>
                 </div>
                 {/* Background Switch Button */}
                 <button
@@ -198,13 +214,20 @@ function App() {
         </DraggableCard>
 
         {/* Recommendation Card - Draggable */}
-        <DraggableCard className="max-w-md w-full" initialPosition={{ x: 0, y: 0 }}>
+        <DraggableCard 
+          className="" 
+          id="recommendation-card"
+          initialPosition={{ x: 0, y: 0 }} 
+          initialSize={{ width: 600, height: 'auto' }}
+          onInteraction={handleCardInteraction}
+          zIndex={getCardZIndex('recommendation-card')}
+        >
           <LiquidGlass params={glassParams}>
-            <div className="p-6 text-center">
+            <div className="p-8 md:p-12 w-full h-full flex flex-col items-center justify-center text-center min-h-[200px]">
               <h3 className="text-lg font-semibold text-white mb-2">
                 Want to Learn More?
               </h3>
-              <p className="text-white/80 text-sm mb-4">
+              <p className="text-white/80 text-sm mb-4 max-w-md">
                 Explore comprehensive tutorials and resources
               </p>
               <a
@@ -213,7 +236,7 @@ function App() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-all duration-300 hover:scale-105"
               >
-                <span>Explore Full Documentation</span>
+<span>View More Resources & Tutorials</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>
@@ -237,7 +260,7 @@ function App() {
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2 bg-black/20 hover:bg-black/30 backdrop-blur-md rounded-full text-white transition-all duration-300 hover:scale-105"
         >
-          <Github className="w-4 h-4" />
+          <GitBranch className="w-4 h-4" />
           <span className="text-sm">View on GitHub</span>
         </a>
       </div>
