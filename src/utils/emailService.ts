@@ -6,11 +6,19 @@ interface EmailResponse {
 
 export const subscribeToNewsletter = async (email: string): Promise<EmailResponse> => {
   console.log('[Email Service] Starting subscription for:', email);
+  console.log('[Email Service] Current URL:', window.location.href);
+  console.log('[Email Service] Environment:', window.location.hostname);
   
   try {
-    console.log('[Email Service] Sending request to /api/subscribe');
+    // 根据环境使用不同的 API 地址
+    const apiUrl = window.location.hostname === 'localhost' 
+      ? 'https://liquidglass-kit.dev/api/subscribe'  // 本地开发时使用生产 API
+      : '/api/subscribe';  // 生产环境使用相对路径
     
-    const response = await fetch('/api/subscribe', {
+    console.log('[Email Service] API URL:', apiUrl);
+    console.log('[Email Service] Sending request to:', apiUrl);
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -60,6 +68,23 @@ export const subscribeToNewsletter = async (email: string): Promise<EmailRespons
     console.error('[Email Service] Subscription error:', error);
     console.error('[Email Service] Error type:', typeof error);
     console.error('[Email Service] Error details:', error);
+    
+    // 检查是否是网络错误
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      console.error('[Email Service] Network error - API endpoint might not be accessible');
+      console.error('[Email Service] This could mean:');
+      console.error('- Vercel Function is not deployed');
+      console.error('- API route is returning an error before sending headers');
+      console.error('- Network/CORS issue');
+      
+      // 尝试直接检查 API 端点
+      try {
+        const checkResponse = await fetch('/api/subscribe', { method: 'OPTIONS' });
+        console.log('[Email Service] OPTIONS check response:', checkResponse.status);
+      } catch (optionsError) {
+        console.error('[Email Service] OPTIONS check failed:', optionsError);
+      }
+    }
     
     return {
       success: false,
