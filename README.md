@@ -1,79 +1,98 @@
-# Liquid Glass Kit - 本地开发环境设置
+# Liquid Glass Effect Demo
 
-## 🚀 快速开始
+An interactive preview tool showcasing the Liquid Glass effect with CSS glassmorphism, draggable cards, and real-time parameter adjustment.
 
-### 1. 环境要求
-- Node.js 18+ 
-- npm 或 yarn
+![Liquid Glass Effect Demo](./public/demo-screenshot.png)
 
-### 2. 安装依赖
-```bash
-npm install
+## Video Demo
+
+<video width="100%" controls>
+  <source src="./public/demo-video.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+## Live Demo
+
+🌐 **[View Live Demo on Vercel](https://liquidglass-web.vercel.app)**
+
+## Features
+
+- 🎨 Switch between 9 different background images
+- ✨ CSS-powered glassmorphism effects
+- 🖱️ Interactive mouse-following parallax background
+- 🎯 Draggable glass cards
+- ⚙️ Real-time parameter adjustment panel
+- 📱 Fully responsive design
+
+## Effect Implementation
+
+This project showcases CSS-based liquid glass effects:
+
+- **Repository**: [lucasromerodb/liquid-glass-effect-macos](https://github.com/lucasromerodb/liquid-glass-effect-macos)
+- **Implementation**: Uses CSS filters, backdrop-filter, and SVG filters for the glass distortion effect
+- **Interactivity**: Real-time parameter controls with draggable UI components
+
+## How to Implement Liquid Glass Effect
+
+### Core Components
+
+1. **SVG Filter for Distortion**
+```xml
+<filter id="glass-distortion">
+  <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" />
+  <feDisplacementMap scale="150" xChannelSelector="R" yChannelSelector="G" />
+</filter>
 ```
 
-### 3. 启动开发服务器
-```bash
-npm run dev
+2. **CSS Glassmorphism Layers**
+```css
+.liquidGlass-wrapper {
+  position: relative;
+  backdrop-filter: blur(3px);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.liquidGlass-effect {
+  filter: url(#glass-distortion);
+  backdrop-filter: blur(3px);
+}
 ```
 
-### 4. 访问网站
-打开浏览器访问: `http://localhost:5173`
-
-## 📁 项目结构
-```
-src/
-├── App.tsx              # 主应用组件
-├── components/
-│   └── VideoPlayer.tsx  # 视频播放器组件
-├── index.css           # 全局样式和Liquid Glass效果
-└── main.tsx            # 应用入口
-
-public/                 # 静态资源
-package.json           # 项目配置和依赖
+3. **React Component Structure**
+```tsx
+<div className="liquidGlass-wrapper">
+  <div className="liquidGlass-effect" />     {/* Distortion layer */}
+  <div className="liquidGlass-tint" />       {/* Color tint layer */}
+  <div className="liquidGlass-shine" />      {/* Shine effect layer */}
+  <div className="liquidGlass-text">        {/* Content layer */}
+    {children}
+  </div>
+</div>
 ```
 
-## 🛠️ 可用命令
+## Tech Stack
 
-- `npm run dev` - 启动开发服务器
-- `npm run build` - 构建生产版本
-- `npm run preview` - 预览生产构建
-- `npm run lint` - 代码检查
+- **Vite** - Build tool
+- **React** - UI framework
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **Lucide React** - Icons
 
-## 🎥 视频功能
+## Interactive Features
 
-网站支持两种视频播放方式：
-1. **YouTube 嵌入** - 有YouTube ID的视频会在模态框中播放
-2. **Apple 官网跳转** - 没有YouTube版本的会跳转到Apple开发者网站
+- **Draggable Cards**: Click and drag any glass card to move it around the screen
+- **Real-time Controls**: Adjust glass parameters (tint, blur, distortion, shine, radius, shadows) in real-time
+- **Background Parallax**: Move your mouse to see the background follow with smooth parallax motion
+- **Background Switching**: Click the "Switch Background" button to cycle through 9 beautiful images
+- **Glass Effects**: Experience authentic glassmorphism with backdrop blur and transparency
+- **Responsive Design**: Works seamlessly across desktop, tablet, and mobile devices
 
-## 🎨 设计特色
+## Learn More
 
-- ✨ Liquid Glass 液态玻璃效果
-- 🌈 渐变背景和动态光球
-- 📱 响应式设计
-- 🎬 视频模态框播放
-- 📧 双重邮件订阅入口
-- 🍎 Apple 设计风格
+For more resources and tutorials about the Liquid Glass design system, visit:
+👉 [liquidglass-kit.dev](https://liquidglass-kit.dev)
 
-## 📧 邮件订阅
+## License
 
-网站包含两个邮件订阅入口：
-1. **顶部横幅** - 可关闭的订阅提示
-2. **页面底部** - 主要订阅区域
-
-## 🌐 域名
-
-网站域名: `liquidglass-kit.dev`
-
-## 🔧 技术栈
-
-- React 18
-- TypeScript
-- Tailwind CSS
-- Vite
-- Lucide React (图标)
-
-## 📱 响应式支持
-
-- 桌面端 (1024px+)
-- 平板端 (768px-1023px) 
-- 移动端 (<768px)
+MIT
