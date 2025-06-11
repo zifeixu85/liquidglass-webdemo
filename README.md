@@ -2,18 +2,26 @@
 
 An interactive preview tool showcasing the Liquid Glass effect with CSS glassmorphism, draggable cards, and real-time parameter adjustment.
 
-![Liquid Glass Effect Demo](./public/demo-screenshot.png)
+[![Liquid Glass Effect Demo](./public/demo-screenshot.png)](https://liquidglass-webdemo.vercel.app/)
 
 ## Video Demo
 
-<video width="100%" controls>
-  <source src="./public/demo-video.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+<div align="center">
+  <a href="https://liquidglass-webdemo.vercel.app/" target="_blank">
+    <video width="100%" controls>
+      <source src="./public/demo-video.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </a>
+</div>
+
+*Click the video to open the live demo*
 
 ## Live Demo
 
-🌐 **[View Live Demo on Vercel](https://liquidglass-webdemo.vercel.app/)**
+🌐 **[View Live Demo on Vercel ↗](https://liquidglass-webdemo.vercel.app/)**
+
+*Click the screenshot above to open the live demo in a new tab*
 
 ## Features
 
@@ -91,7 +99,7 @@ This project showcases CSS-based liquid glass effects:
 ## Learn More
 
 For more resources and tutorials about the Liquid Glass design system, visit:
-👉 [liquidglass-kit.dev](https://liquidglass-kit.dev)
+👉 [liquidglass-kit.dev ↗](https://liquidglass-kit.dev)
 
 ## License
 
