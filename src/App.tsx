@@ -1,20 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { ExternalLink, Mail, Download, Code2, Palette, Layers, Sparkles, ChevronDown, Check, Share2, Link, Star } from 'lucide-react';
+import { ExternalLink, Mail, Download, Code2, Palette, Layers, Sparkles, ChevronDown, Check, Star } from 'lucide-react';
 import { VideoPlayer } from './components/VideoPlayer';
 import Analytics from './components/Analytics';
+import LiquidGlass from './components/LiquidGlass';
+import FloatingControls from './components/FloatingControls';
 import { subscribeToNewsletter } from './utils/emailService';
 
 function App() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscriptionMessage, setSubscriptionMessage] = useState('');
-  const [copyStatus, setCopyStatus] = useState('');
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const scrolled = window.scrollY > 50;
+      
+      // 直接操作 DOM 样式
+      const nav = document.querySelector('nav[data-nav="main"]') as HTMLElement;
+      if (nav) {
+        if (scrolled) {
+          nav.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+          nav.style.backdropFilter = 'blur(20px)';
+          (nav.style as any).webkitBackdropFilter = 'blur(20px)';
+          nav.style.borderBottom = '1px solid rgba(255, 255, 255, 0.3)';
+          nav.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.2)';
+        } else {
+          nav.style.backgroundColor = 'transparent';
+          nav.style.backdropFilter = 'none';
+          (nav.style as any).webkitBackdropFilter = 'none';
+          nav.style.borderBottom = 'none';
+          nav.style.boxShadow = 'none';
+        }
+      }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -202,46 +220,75 @@ function App() {
     }
   };
   
-  // 分享功能
-  const shareContent = {
-    title: 'Liquid Glass Design System - WWDC 2025 Resources',
-    text: 'Check out this comprehensive resource for Apple\'s Liquid Glass design system from WWDC 2025!',
-    url: 'https://liquidglass-kit.dev'
-  };
-  
-  const handleShare = (platform: string) => {
-    const { title, text, url } = shareContent;
-    
-    switch (platform) {
-      case 'x':
-        window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-        break;
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-        break;
-      case 'copy':
-        navigator.clipboard.writeText(url);
-        setCopyStatus('Copied!');
-        setTimeout(() => setCopyStatus(''), 2000);
-        break;
-      case 'native':
-        if (navigator.share) {
-          navigator.share({ title, text, url });
-        }
-        break;
-    }
-  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dynamic-background">
+      {/* SVG 滤镜 - 全局定义一次 */}
+      <svg style={{ display: 'none' }}>
+        <filter
+          id="glass-distortion"
+          x="0%"
+          y="0%"
+          width="100%"
+          height="100%"
+          filterUnits="objectBoundingBox"
+        >
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.01 0.01"
+            numOctaves="1"
+            seed="5"
+            result="turbulence"
+          />
+          
+          <feComponentTransfer in="turbulence" result="mapped">
+            <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+            <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+            <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+          </feComponentTransfer>
+
+          <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+
+          <feSpecularLighting
+            in="softMap"
+            surfaceScale="5"
+            specularConstant="1"
+            specularExponent="100"
+            lightingColor="white"
+            result="specLight"
+          >
+            <fePointLight x="-200" y="-200" z="300" />
+          </feSpecularLighting>
+
+          <feComposite
+            in="specLight"
+            operator="arithmetic"
+            k1="0"
+            k2="1"
+            k3="1"
+            k4="0"
+            result="litImage"
+          />
+
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="softMap"
+            scale="150"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+      </svg>
+
       <Analytics />
 
       {/* Navigation */}
-      <nav className={`fixed w-full z-40 transition-all duration-500 top-0 ${
-        isScrolled 
-          ? 'bg-white/10 backdrop-blur-xl border-b border-white/20' 
-          : 'bg-transparent'
-      }`}>
+      <nav 
+        data-nav="main"
+        className="fixed w-full transition-all duration-500 top-0"
+        style={{
+          zIndex: 9999
+        }}>
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -260,51 +307,6 @@ function App() {
               <button onClick={() => scrollToSection('resources')} className="text-white/80 hover:text-white transition-colors">Resources</button>
             </div>
             <div className="flex items-center space-x-4">
-              {/* 分享按钮 */}
-              <div className="relative group share-menu-hover">
-                <button className="glass-button text-white/80 hover:text-white p-2 relative z-10">
-                  <Share2 className="w-5 h-5" />
-                </button>
-                
-                {/* Liquid Glass 风格浮层 - hover 显示 */}
-                <div className="absolute right-0 top-full glass-card p-3 space-y-2 min-w-[140px] z-20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out transform translate-y-2 group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto">
-                  <button 
-                    onClick={() => handleShare('x')} 
-                    className="flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg text-sm w-full transition-all duration-200 hover:scale-105"
-                  >
-                    <div className="w-4 h-4 flex items-center justify-center text-white bg-black rounded-sm">
-                      <span className="text-xs font-bold">𝕏</span>
-                    </div>
-                    <span>X</span>
-                  </button>
-                  <button 
-                    onClick={() => handleShare('facebook')} 
-                    className="flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg text-sm w-full transition-all duration-200 hover:scale-105"
-                  >
-                    <div className="w-4 h-4 flex items-center justify-center text-white bg-blue-600 rounded-sm">
-                      <span className="text-xs font-bold">f</span>
-                    </div>
-                    <span>Facebook</span>
-                  </button>
-                  <button 
-                    onClick={() => handleShare('copy')} 
-                    className="flex items-center space-x-3 px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg text-sm w-full transition-all duration-200 hover:scale-105"
-                  >
-                    {copyStatus ? (
-                      <>
-                        <Check className="w-4 h-4 text-green-400" />
-                        <span>{copyStatus}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Link className="w-4 h-4 text-green-400" />
-                        <span>Copy</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-              
               <button 
                 onClick={() => scrollToSection('resources')}
                 className="glass-button text-white hover:bg-white/20"
@@ -319,7 +321,6 @@ function App() {
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20"></div>
         <div className="glass-orb glass-orb-1"></div>
         <div className="glass-orb glass-orb-2"></div>
         <div className="glass-orb glass-orb-3"></div>
@@ -340,8 +341,8 @@ function App() {
         <div className="liquid-circle liquid-circle-4"></div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
-          {/* 单一大的 glass 容器 */}
-          <div className="glass-card p-8 lg:p-16">
+          {/* 单一大的 Liquid Glass 容器 */}
+          <LiquidGlass className="p-8 lg:p-16 rounded-3xl shadow-2xl">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* 左侧文字内容 */}
               <div className="space-y-8">
@@ -417,11 +418,11 @@ function App() {
                 </div>
               </div>
             </div>
-          </div>
+          </LiquidGlass>
           
           {/* 邮件订阅区域 - 拉通显示 */}
           <div className="mt-12">
-            <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 p-8 rounded-2xl border border-blue-500/20 backdrop-blur-sm">
+            <LiquidGlass className="p-8 rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
               <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-6">
                   <div className="flex items-center justify-center gap-3 mb-3">
@@ -501,7 +502,7 @@ function App() {
                   </div>
                 </form>
               </div>
-            </div>
+            </LiquidGlass>
           </div>
           
           <div className="text-center mt-12">
@@ -533,7 +534,7 @@ function App() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-16">
-            <div className="glass-card p-8">
+            <LiquidGlass className="p-8 rounded-2xl">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
@@ -542,9 +543,9 @@ function App() {
                 Not recreating physical glass, but creating an adaptive digital material that 
                 combines optical qualities with fluid interactions only Apple can achieve.
               </p>
-            </div>
+            </LiquidGlass>
             
-            <div className="glass-card p-8">
+            <LiquidGlass className="p-8 rounded-2xl">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-6">
                 <Layers className="w-6 h-6 text-white" />
               </div>
@@ -553,15 +554,15 @@ function App() {
                 One unified development framework across iOS 26, iPadOS 26, macOS 26, watchOS 26, 
                 and visionOS 26 with consistent APIs and design patterns.
               </p>
-            </div>
+            </LiquidGlass>
           </div>
 
-          <div className="glass-card p-8 text-center">
+          <LiquidGlass className="p-8 text-center rounded-2xl">
             <blockquote className="text-2xl text-white/90 italic mb-4">
               "The optical qualities of glass with a fluidity only Apple can achieve."
             </blockquote>
             <cite className="text-white/60">— Alan Dye, VP of Human Interface Design</cite>
-          </div>
+          </LiquidGlass>
         </div>
       </section>
 
@@ -576,7 +577,7 @@ function App() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            <div className="glass-card p-8 group hover:scale-105 transition-transform duration-300">
+            <LiquidGlass className="p-8 group hover:scale-105 transition-transform duration-300 rounded-2xl">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform">
                 <div className="w-8 h-8 bg-white/20 rounded-lg backdrop-blur-sm"></div>
               </div>
@@ -585,9 +586,9 @@ function App() {
                 Frosted glass appearance with dynamic light refraction and reflection, 
                 creating depth and visual hierarchy.
               </p>
-            </div>
+            </LiquidGlass>
 
-            <div className="glass-card p-8 group hover:scale-105 transition-transform duration-300">
+            <LiquidGlass className="p-8 group hover:scale-105 transition-transform duration-300 rounded-2xl">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
@@ -596,9 +597,9 @@ function App() {
                 Dynamic light reflection responding to movement in real-time, 
                 enhancing the tactile feel of digital interfaces.
               </p>
-            </div>
+            </LiquidGlass>
 
-            <div className="glass-card p-8 group hover:scale-105 transition-transform duration-300">
+            <LiquidGlass className="p-8 group hover:scale-105 transition-transform duration-300 rounded-2xl">
               <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform">
                 <Layers className="w-8 h-8 text-white" />
               </div>
@@ -607,7 +608,7 @@ function App() {
                 Visual warping and bending that communicates depth and layering, 
                 creating immersive spatial experiences.
               </p>
-            </div>
+            </LiquidGlass>
           </div>
         </div>
       </section>
@@ -700,7 +701,7 @@ function App() {
 
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Developer Resources */}
-            <div className="glass-card p-8">
+            <LiquidGlass className="p-8">
               <div className="flex items-center mb-6">
                 <Code2 className="w-8 h-8 text-blue-400 mr-3" />
                 <h3 className="text-2xl font-semibold text-white">Developer Resources</h3>
@@ -745,10 +746,10 @@ function App() {
                   <ExternalLink className="w-4 h-4 text-white/60 group-hover:text-white" />
                 </a>
               </div>
-            </div>
+            </LiquidGlass>
 
             {/* Design Resources */}
-            <div className="glass-card p-8">
+            <LiquidGlass className="p-8">
               <div className="flex items-center mb-6">
                 <Palette className="w-8 h-8 text-purple-400 mr-3" />
                 <h3 className="text-2xl font-semibold text-white">Design Resources</h3>
@@ -799,7 +800,7 @@ function App() {
                   Download All Resources
                 </a>
               </div>
-            </div>
+            </LiquidGlass>
           </div>
         </div>
       </section>
@@ -808,7 +809,7 @@ function App() {
       {/* Newsletter Section */}
       <section className="py-20 px-6 bg-gradient-to-b from-transparent to-black/20">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="glass-card p-12">
+          <LiquidGlass className="p-12">
             <div className="mb-8">
               <Mail className="w-16 h-16 text-blue-400 mx-auto mb-6" />
               <h2 className="text-4xl font-bold text-white mb-4">Never Miss an Update</h2>
@@ -880,7 +881,7 @@ function App() {
                 Join the community: Follow <strong className="text-white/80">liquidglass-kit.dev</strong> for the latest in Apple design
               </p>
             </div>
-          </div>
+          </LiquidGlass>
         </div>
       </section>
 
@@ -903,33 +904,6 @@ function App() {
                 Your ultimate resource hub for Apple's Liquid Glass design system from WWDC 2025. 
                 Comprehensive tutorials, design kits, and SwiftUI examples for iOS 26, macOS Tahoe, and visionOS.
               </p>
-              <div className="flex items-center space-x-4 mt-4">
-                <button 
-                  onClick={() => handleShare('x')}
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-                  aria-label="Share on X"
-                >
-                  <div className="w-5 h-5 flex items-center justify-center text-white bg-black rounded-sm">
-                    <span className="text-sm font-bold">𝕏</span>
-                  </div>
-                </button>
-                <button 
-                  onClick={() => handleShare('facebook')}
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-                  aria-label="Share on Facebook"
-                >
-                  <div className="w-5 h-5 flex items-center justify-center text-white bg-blue-600 rounded-sm">
-                    <span className="text-sm font-bold">f</span>
-                  </div>
-                </button>
-                <button 
-                  onClick={() => handleShare('copy')}
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-                  aria-label="Copy"
-                >
-                  <Link className="w-5 h-5 text-white/70 hover:text-white" />
-                </button>
-              </div>
             </div>
             
             {/* Quick Links */}
@@ -974,6 +948,9 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {/* Floating Controls */}
+      <FloatingControls />
     </div>
   );
 }

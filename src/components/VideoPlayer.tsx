@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Play, ExternalLink, X } from 'lucide-react';
+import LiquidGlass from './LiquidGlass';
 
 interface VideoPlayerProps {
   title: string;
@@ -30,7 +31,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   return (
     <>
-      <div className="glass-card overflow-hidden group cursor-pointer" onClick={handlePlay}>
+      <LiquidGlass className="overflow-hidden group cursor-pointer" onClick={handlePlay}>
         <div className="h-40 relative flex items-center justify-center">
           {/* YouTube Thumbnail */}
           {youtubeId ? (
@@ -77,7 +78,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             <ExternalLink className="w-4 h-4 text-white/50" />
           </div>
         </div>
-      </div>
+      </LiquidGlass>
 
       {/* Video Modal */}
       {showModal && youtubeId && (
@@ -89,7 +90,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             >
               <X className="w-8 h-8" />
             </button>
-            <div className="glass-card overflow-hidden">
+            <LiquidGlass className="overflow-hidden">
               <div className="aspect-video">
                 <iframe
                   src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&fs=1&iv_load_policy=3&cc_load_policy=0&playsinline=1&color=white&autohide=1&loop=1&playlist=${youtubeId}`}
@@ -99,7 +100,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                   allowFullScreen
                 />
               </div>
-            </div>
+            </LiquidGlass>
           </div>
         </div>
       )}
