@@ -91,6 +91,27 @@
   .liquidGlass-shine {
     border-radius: 16px;
   }
+
+  /* Optimize controls panel for mobile */
+  .glass-controls-mobile {
+    top: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+  }
+
+  /* Make controls panel more touch-friendly on mobile */
+  .glass-controls-header {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Ensure draggable cards don't overflow on mobile */
+  .draggable {
+    max-width: 90vw;
+    position: relative !important;
+  }
 }
 
 /* Smooth scrolling */

@@ -18,6 +18,16 @@ export function DraggableCard({ children, initialPosition = { x: 0, y: 0 }, init
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -59,6 +69,9 @@ export function DraggableCard({ children, initialPosition = { x: 0, y: 0 }, init
   }, [isDragging, isResizing, dragStart, resizeStart]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Disable dragging on mobile
+    if (isMobile) return;
+
     // Prevent dragging if clicking on interactive elements
     if ((e.target as HTMLElement).closest('button, a')) {
       return;
@@ -77,6 +90,9 @@ export function DraggableCard({ children, initialPosition = { x: 0, y: 0 }, init
   const handleResizeMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering drag
     
+    // Disable resizing on mobile
+    if (isMobile) return;
+
     // Bring this card to front
     if (onInteraction && id) {
       onInteraction(id);
@@ -101,22 +117,24 @@ export function DraggableCard({ children, initialPosition = { x: 0, y: 0 }, init
         height: typeof size.height === 'number' ? `${size.height}px` : size.height,
         transition: (isDragging || isResizing) ? 'none' : 'transform 0.2s ease-out',
         zIndex: (isDragging || isResizing) ? 50 : zIndex,
-        cursor: isDragging ? 'grabbing' : 'grab',
+        cursor: isMobile ? 'default' : (isDragging ? 'grabbing' : 'grab'),
       }}
       onMouseDown={handleMouseDown}
     >
       {children}
       
-      {/* Resize handle in bottom-right corner */}
-      <div
-        className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize opacity-0 hover:opacity-100 transition-opacity"
-        style={{
-          background: 'linear-gradient(-45deg, transparent 30%, rgba(255,255,255,0.3) 30%, rgba(255,255,255,0.3) 70%, transparent 70%)',
-          borderBottomRightRadius: 'inherit'
-        }}
-        onMouseDown={handleResizeMouseDown}
-        title="Drag to resize"
-      />
+      {/* Resize handle in bottom-right corner - hide on mobile */}
+      {!isMobile && (
+        <div
+          className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize opacity-0 hover:opacity-100 transition-opacity"
+          style={{
+            background: 'linear-gradient(-45deg, transparent 30%, rgba(255,255,255,0.3) 30%, rgba(255,255,255,0.3) 70%, transparent 70%)',
+            borderBottomRightRadius: 'inherit'
+          }}
+          onMouseDown={handleResizeMouseDown}
+          title="Drag to resize"
+        />
+      )}
     </div>
   );
 }

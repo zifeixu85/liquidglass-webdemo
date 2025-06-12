@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface GlassParams {
   tintOpacity: number;
@@ -17,6 +18,23 @@ interface GlassControlsProps {
 }
 
 export function GlassControls({ params, onParamsChange, mousePosition, autoOffset }: GlassControlsProps) {
+  // Check if mobile device on initial render
+  const [isMobile, setIsMobile] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // Desktop: default expanded, Mobile: default collapsed
+      setIsExpanded(!mobile);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const handleParamChange = (key: keyof GlassParams, value: number) => {
     onParamsChange({
       ...params,
@@ -36,18 +54,32 @@ export function GlassControls({ params, onParamsChange, mousePosition, autoOffse
   };
 
   return (
-    <div className="fixed top-4 left-4 z-50">
-      {/* Controls Panel - Always Open */}
-      <div className="bg-black/20 backdrop-blur-md rounded-xl p-4 text-white text-xs font-mono">
-        {/* Position Info */}
-        <div className="mb-4 space-y-1 border-b border-white/20 pb-3">
-          <div>Mouse: ({Math.round(mousePosition.x * 100)}, {Math.round(mousePosition.y * 100)})</div>
-          <div>Flow: ({Math.round(autoOffset.x)}, {Math.round(autoOffset.y)})</div>
-<div className="text-white/60">💡 Drag cards to move • Bottom-right to resize</div>
+    <div className={`fixed z-50 ${isMobile ? 'glass-controls-mobile top-2 left-2 right-2' : 'top-4 left-4'}`}>
+      <div className="bg-black/20 backdrop-blur-md rounded-xl text-white text-xs font-mono overflow-hidden">
+        {/* Header with toggle button */}
+        <div 
+          className={`p-4 cursor-pointer hover:bg-white/5 transition-colors flex items-center justify-between ${isMobile ? 'glass-controls-header' : ''}`}
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Glass Controls</span>
+            {isMobile && <span className="text-white/60">(Tap to expand)</span>}
+          </div>
+          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </div>
 
-        {/* Glass Parameters */}
-        <div className="space-y-3">
+        {/* Collapsible Content */}
+        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
+          <div className="p-4 pt-0">
+            {/* Position Info */}
+            <div className="mb-4 space-y-1 border-b border-white/20 pb-3">
+              <div>Mouse: ({Math.round(mousePosition.x * 100)}, {Math.round(mousePosition.y * 100)})</div>
+              <div>Flow: ({Math.round(autoOffset.x)}, {Math.round(autoOffset.y)})</div>
+              <div className="text-white/60">💡 Drag cards to move • Bottom-right to resize</div>
+            </div>
+
+            {/* Glass Parameters */}
+            <div className="space-y-3">
           <div className="text-white/80 font-semibold text-sm mb-2">Glass Parameters</div>
           
           {/* Tint Opacity */}
@@ -146,13 +178,15 @@ export function GlassControls({ params, onParamsChange, mousePosition, autoOffse
             />
           </div>
 
-          {/* Reset Button */}
-          <button
-            onClick={resetToDefaults}
-            className="w-full mt-4 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs transition-colors"
-          >
-            Reset to Defaults
-          </button>
+              {/* Reset Button */}
+              <button
+                onClick={resetToDefaults}
+                className="w-full mt-4 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs transition-colors"
+              >
+                Reset to Defaults
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

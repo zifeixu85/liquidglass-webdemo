@@ -23,6 +23,7 @@ function App() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [autoOffset, setAutoOffset] = useState({ x: 0, y: 0 });
   const [activeCardId, setActiveCardId] = useState<string>('main-card');
+  const [isMobile, setIsMobile] = useState(false);
   
   // Liquid Glass adjustable parameters
   const [glassParams, setGlassParams] = useState({
@@ -35,6 +36,14 @@ function App() {
   });
 
   useEffect(() => {
+    // Check for mobile device
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
     // Preload images
     backgrounds.forEach(bg => {
       const img = document.createElement('img');
@@ -71,6 +80,7 @@ function App() {
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', checkMobile);
     };
   }, []);
 
@@ -168,44 +178,48 @@ function App() {
       <div className="relative min-h-screen flex flex-col items-center justify-center p-4 gap-6">
         {/* Main Card - Draggable */}
         <DraggableCard 
-          className="" 
+          className={isMobile ? "w-full max-w-lg" : ""} 
           id="main-card"
           initialPosition={{ x: 0, y: 0 }} 
-          initialSize={{ width: 600, height: 'auto' }}
+          initialSize={{ width: isMobile ? '90vw' : 600, height: 'auto' }}
           onInteraction={handleCardInteraction}
           zIndex={getCardZIndex('main-card')}
         >
           <LiquidGlass params={glassParams}>
-            <div className="p-8 md:p-12">
+            <div className="p-6 md:p-12">
               {/* Header with background switch */}
-              <div className="flex items-center justify-between mb-8">
-                <div className="text-white/60 text-sm flex items-center gap-2">
-<span>🖱️ Drag to move • ↘️ Resize</span>
+              <div className="flex items-center justify-between mb-6 md:mb-8">
+                <div className="text-white/60 text-xs md:text-sm flex items-center gap-2">
+                  {!isMobile && <span>🖱️ Drag to move • ↘️ Resize</span>}
                 </div>
                 {/* Background Switch Button */}
                 <button
                   onClick={nextBackground}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-all duration-300 hover:scale-105"
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-all duration-300 hover:scale-105"
                   title="Switch Background"
                 >
                   <Image className="w-4 h-4" />
-                  <span className="text-sm">Switch Background</span>
+                  <span className="text-xs md:text-sm">{isMobile ? 'Switch' : 'Switch Background'}</span>
                 </button>
               </div>
 
               {/* Content */}
               <div className="text-center">
-                <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+                <h1 className="text-3xl md:text-6xl font-bold text-white mb-3 md:mb-4">
                   Liquid Glass
                 </h1>
-                <p className="text-xl md:text-2xl text-white/90 mb-6">
+                <p className="text-lg md:text-2xl text-white/90 mb-4 md:mb-6">
                   WWDC 2025 Preview
                 </p>
-                <p className="text-white/80 mb-8 text-lg">
-                  Experience the revolutionary Liquid Glass design system. 
-                  Drag the cards around and move your mouse to see the interactive effects.
+                <p className="text-white/80 mb-6 md:mb-8 text-sm md:text-lg">
+                  {isMobile ? (
+                    <>Experience the future of design<br />with real-time glass effects</>
+                  ) : (
+                    <>Experience the revolutionary Liquid Glass design system.<br />
+                    Drag the cards around and move your mouse to see the interactive effects.</>
+                  )}
                 </p>
-                <div className="text-white/70 text-sm">
+                <div className="text-white/70 text-xs md:text-sm">
                   CSS-powered glassmorphism with interactive parallax
                 </div>
               </div>
@@ -215,15 +229,15 @@ function App() {
 
         {/* Recommendation Card - Draggable */}
         <DraggableCard 
-          className="" 
+          className={isMobile ? "w-full max-w-lg" : ""} 
           id="recommendation-card"
           initialPosition={{ x: 0, y: 0 }} 
-          initialSize={{ width: 600, height: 'auto' }}
+          initialSize={{ width: isMobile ? '90vw' : 600, height: 'auto' }}
           onInteraction={handleCardInteraction}
           zIndex={getCardZIndex('recommendation-card')}
         >
           <LiquidGlass params={glassParams}>
-            <div className="p-8 md:p-12 w-full h-full flex flex-col items-center justify-center text-center min-h-[200px]">
+            <div className="p-6 md:p-12 w-full h-full flex flex-col items-center justify-center text-center min-h-[150px] md:min-h-[200px]">
               <h3 className="text-lg font-semibold text-white mb-2">
                 Want to Learn More?
               </h3>
