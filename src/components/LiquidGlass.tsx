@@ -27,6 +27,8 @@ const LiquidGlass: React.FC<LiquidGlassProps> = ({
 
   const effectStyle = params ? {
     backdropFilter: `blur(${params.backdropBlur}px)`,
+    filter: 'url(#glass-distortion)',
+    WebkitFilter: 'url(#glass-distortion)',
     borderRadius: 'inherit'
   } : {};
 

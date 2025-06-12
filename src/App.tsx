@@ -24,6 +24,7 @@ function App() {
   const [autoOffset, setAutoOffset] = useState({ x: 0, y: 0 });
   const [activeCardId, setActiveCardId] = useState<string>('main-card');
   const [isMobile, setIsMobile] = useState(false);
+  const [svgKey, setSvgKey] = useState(0);
   
   // Liquid Glass adjustable parameters
   const [glassParams, setGlassParams] = useState({
@@ -34,6 +35,13 @@ function App() {
     borderRadius: 20,         // Border radius size (0-50)
     shadowIntensity: 0.3      // Shadow intensity (0-1)
   });
+
+  // Force SVG re-render on params change for mobile
+  useEffect(() => {
+    if (isMobile) {
+      setSvgKey(prev => prev + 1);
+    }
+  }, [glassParams.displacementScale, isMobile]);
 
   useEffect(() => {
     // Check for mobile device
@@ -105,15 +113,17 @@ function App() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* SVG Filter for Liquid Glass Effect - strictly following original project */}
-      <svg style={{ display: 'none' }}>
-        <filter
-          id="glass-distortion"
-          x="0%"
-          y="0%"
-          width="100%"
-          height="100%"
-          filterUnits="objectBoundingBox"
-        >
+      <svg key={svgKey} style={{ display: 'none' }} width="0" height="0">
+        <defs>
+          <filter
+            id="glass-distortion"
+            x="-50%"
+            y="-50%"
+            width="200%"
+            height="200%"
+            filterUnits="objectBoundingBox"
+            primitiveUnits="userSpaceOnUse"
+          >
           <feTurbulence
             type="fractalNoise"
             baseFrequency="0.01 0.01"
@@ -154,11 +164,12 @@ function App() {
           <feDisplacementMap
             in="SourceGraphic"
             in2="softMap"
-            scale={glassParams.displacementScale}
+            scale={glassParams.displacementScale.toString()}
             xChannelSelector="R"
             yChannelSelector="G"
           />
-        </filter>
+          </filter>
+        </defs>
       </svg>
 
       {/* Mouse-Following Background */}
